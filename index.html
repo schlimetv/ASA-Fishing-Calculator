@@ -74,6 +74,15 @@
   input[type=range]::-moz-range-thumb{width:22px; height:22px; border-radius:50%;
     background:var(--aqua); border:3px solid var(--abyss); cursor:pointer}
   input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px rgba(61,215,196,.4)}
+  .slider-row{display:flex; align-items:center; gap:10px}
+  .slider-row input[type=range]{flex:1; min-width:0}
+  .step-btn{flex-shrink:0; width:30px; height:30px; border-radius:8px; border:1px solid var(--line);
+    background:var(--surface); color:var(--muted); font-family:var(--hud); font-weight:700;
+    font-size:18px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    padding:0; -webkit-appearance:none; transition:border-color .15s, color .15s, transform .1s}
+  .step-btn:hover{border-color:var(--aqua); color:var(--aqua)}
+  .step-btn:active{transform:scale(.9)}
+  .step-btn:focus-visible{outline:none; box-shadow:0 0 0 3px rgba(61,215,196,.35)}
   .tick-row{display:flex; justify-content:space-between; gap:8px; font-family:var(--hud);
     font-size:10.5px; color:var(--faint); letter-spacing:.04em; margin-top:5px}
   .tick-row span.cap-mark{color:var(--gold); text-align:center}
@@ -278,7 +287,7 @@
         <div class="gauge-wrap">
           <svg viewBox="0 0 210 210" role="img" aria-label="Loot quality gauge">
             <circle cx="105" cy="105" r="88" fill="none" stroke="#19323f" stroke-width="12"/>
-            <circle id="arc" cx="105" cy="105" r="88" fill="none" stroke="#3dd7c4" stroke-width="12"
+            <circle id="arc" cx="105" cy="105" r="88" fill="none" stroke="#4aa0ea" stroke-width="12"
               stroke-linecap="round" stroke-dasharray="553" stroke-dashoffset="553"
               transform="rotate(-90 105 105)" style="transition:stroke-dashoffset .35s ease, stroke .35s ease"/>
           </svg>
@@ -286,7 +295,7 @@
           <span class="gauge-score" id="score">58</span>
           <span class="gauge-of">/ 100</span>
         </div>
-        <span class="tier-tag" id="tier" style="color:#85b7eb">Apprentice</span>
+        <span class="tier-tag" id="tier" style="color:#4aa0ea">Apprentice</span>
         <p class="tier-note" id="tierNote">Reliable usable gear. You are on the right track, so keep pushing size.</p>
         <div class="formula">
           <b id="fRod">3.5</b> rod × <b id="fSize">2.0</b> size × <b id="fBait">1.4</b> bait × <span class="srv" id="fSrv">1.0</span> server
@@ -483,12 +492,12 @@
   var MAXRAW = 5.0 * 2.4 * 1.4;
 
   var tiers = [
-    {min:0,  name:'Primitive',  color:'#7fa6a0', note:'Mostly resources and meat. Bump rod, size, or bait to start seeing gear.'},
-    {min:30, name:'Ramshackle', color:'#9fe1cb', note:'Low tier blueprints appear. Bigger fish and a stronger rod move you up fast.'},
-    {min:48, name:'Apprentice', color:'#85b7eb', note:'Reliable usable gear. You are on the right track, so keep pushing size.'},
-    {min:64, name:'Journeyman', color:'#3dd7c4', note:'Solid mid tier blueprints likely. Push size and rod higher for Ascendant odds.'},
-    {min:80, name:'Mastercraft',color:'#f0b429', note:'Strong loot range. A near max rod on a big fish gets you to the top band.'},
-    {min:92, name:'Ascendant',  color:'#f0b429', note:'Top band potential. About as good as a single cast gets.'}
+    {min:0,  name:'Primitive',  color:'#b0bab8', note:'Mostly resources and meat. Bump rod, size, or bait to start seeing gear.'},
+    {min:30, name:'Ramshackle', color:'#74c957', note:'Low tier blueprints appear. Bigger fish and a stronger rod move you up fast.'},
+    {min:48, name:'Apprentice', color:'#4aa0ea', note:'Reliable usable gear. You are on the right track, so keep pushing size.'},
+    {min:64, name:'Journeyman', color:'#b070e6', note:'Solid mid tier blueprints likely. Push size and rod higher for Ascendant odds.'},
+    {min:80, name:'Mastercraft',color:'#f2c42a', note:'Strong loot range. A near max rod on a big fish gets you to the top band.'},
+    {min:92, name:'Ascendant',  color:'#5be3e8', note:'Top band potential. About as good as a single cast gets.'}
   ];
 
   function round1(v){ return Math.round(v*10)/10; }
@@ -610,7 +619,36 @@
     });
   });
 
+  // ---------- STEPPER BUTTONS ----------
+  function buildSteppers(){
+    document.querySelectorAll('input[type=range]').forEach(function(inp){
+      if(inp.closest('.slider-row')) return;
+      var row = document.createElement('div'); row.className = 'slider-row';
+      var label = inp.getAttribute('aria-label') || 'value';
+      var minus = document.createElement('button');
+      minus.type = 'button'; minus.className = 'step-btn'; minus.innerHTML = '&minus;';
+      minus.setAttribute('aria-label', 'Decrease ' + label);
+      var plus = document.createElement('button');
+      plus.type = 'button'; plus.className = 'step-btn'; plus.textContent = '+';
+      plus.setAttribute('aria-label', 'Increase ' + label);
+      inp.parentNode.insertBefore(row, inp);
+      row.appendChild(minus); row.appendChild(inp); row.appendChild(plus);
+      var step = parseFloat(inp.step) || 1;
+      var min = parseFloat(inp.min), max = parseFloat(inp.max);
+      var decs = (String(inp.step).split('.')[1] || '').length;
+      function nudge(dir){
+        var v = parseFloat(inp.value) + dir * step;
+        v = Math.min(max, Math.max(min, v));
+        inp.value = decs ? v.toFixed(decs) : String(Math.round(v));
+        inp.dispatchEvent(new Event('input', {bubbles:true}));
+      }
+      minus.addEventListener('click', function(){ nudge(-1); });
+      plus.addEventListener('click', function(){ nudge(1); });
+    });
+  }
+
   // ---------- INIT ----------
+  buildSteppers();
   applyFilters();
   update();
 </script>
