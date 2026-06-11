@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sabertooth Salmon Field Computer for ARK: Survival Ascended</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --abyss:#0a1419; --deep:#0f1f28; --panel:#13252f; --surface:#19323f;
+    --line:rgba(61,215,196,.14); --line-strong:rgba(61,215,196,.32);
+    --aqua:#3dd7c4; --aqua-dim:#2a9e91; --gold:#f0b429; --gold-dim:#9c7414;
+    --ink:#e8f4f2; --muted:#7fa6a0; --faint:#52716c;
+    --danger:#e8604c; --warn:#f0b429; --good:#3dd7c4;
+    --r:10px; --r-lg:16px;
+    --hud:'Rajdhani',system-ui,sans-serif;
+    --body:'Inter',system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      radial-gradient(900px 500px at 80% -5%, rgba(61,215,196,.08), transparent 60%),
+      radial-gradient(700px 500px at 10% 0%, rgba(240,180,41,.05), transparent 55%),
+      var(--abyss);
+    color:var(--ink); font-family:var(--body); line-height:1.6;
+    min-height:100vh; padding:0 0 4rem;
+  }
+  .wrap{max-width:1080px; margin:0 auto; padding:0 1.25rem}
+  ::selection{background:rgba(61,215,196,.3)}
+
+  header{padding:2.5rem 0 1.5rem; border-bottom:1px solid var(--line)}
+  .eyebrow{font-family:var(--hud); letter-spacing:.28em; text-transform:uppercase;
+    font-size:12px; color:var(--aqua); font-weight:600; display:flex; align-items:center; gap:10px}
+  .eyebrow::before{content:""; width:26px; height:2px; background:var(--aqua); display:inline-block}
+  h1{font-family:var(--hud); font-weight:700; font-size:clamp(28px,5vw,46px);
+    line-height:1.04; margin:.5rem 0 .4rem; letter-spacing:.01em}
+  h1 .fish{color:var(--gold)}
+  .sub{color:var(--muted); font-size:15px; max-width:62ch}
+  .meta-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:1rem}
+  .chip{font-family:var(--hud); font-weight:600; font-size:12px; letter-spacing:.05em;
+    text-transform:uppercase; padding:5px 12px; border-radius:20px;
+    border:1px solid var(--line-strong); color:var(--muted)}
+  .chip b{color:var(--aqua); font-weight:700}
+
+  section{padding-top:2.5rem}
+  .sec-head{font-family:var(--hud); font-weight:600; letter-spacing:.18em;
+    text-transform:uppercase; font-size:13px; color:var(--muted); margin-bottom:1rem;
+    display:flex; align-items:center; gap:12px}
+  .sec-head::after{content:""; flex:1; height:1px; background:var(--line)}
+  .sec-head .n{color:var(--gold); font-weight:700}
+  .sec-cap{color:var(--faint); font-size:13px; margin:-.4rem 0 1.1rem; max-width:72ch; line-height:1.55}
+  .sec-cap b{color:var(--muted); font-weight:600}
+
+  .calc{display:grid; grid-template-columns:1.15fr .85fr; gap:1.25rem}
+  @media(max-width:760px){.calc{grid-template-columns:1fr}}
+  .panel{background:linear-gradient(180deg, var(--panel), var(--deep));
+    border:1px solid var(--line); border-radius:var(--r-lg); padding:1.4rem 1.5rem}
+  @media(max-width:420px){.panel{padding:1.2rem 1.1rem}}
+  .ctrl{margin-bottom:1.4rem}
+  .ctrl:last-child{margin-bottom:0}
+  .ctrl-top{display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:.55rem}
+  .ctrl-label{font-family:var(--hud); font-weight:600; font-size:15px; letter-spacing:.04em}
+  .ctrl-val{font-family:var(--hud); font-weight:700; font-size:20px; color:var(--aqua); white-space:nowrap}
+  .ctrl-val small{font-size:13px; color:var(--muted); font-weight:500}
+  .ctrl-val.cap{color:var(--danger)}
+  input[type=range]{-webkit-appearance:none; appearance:none; width:100%; height:6px;
+    background:var(--surface); border-radius:6px; outline:none; cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; appearance:none;
+    width:22px; height:22px; border-radius:50%; background:var(--aqua);
+    border:3px solid var(--abyss); box-shadow:0 0 0 1px var(--aqua-dim); cursor:pointer}
+  input[type=range]::-moz-range-thumb{width:22px; height:22px; border-radius:50%;
+    background:var(--aqua); border:3px solid var(--abyss); cursor:pointer}
+  input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px rgba(61,215,196,.4)}
+  .tick-row{display:flex; justify-content:space-between; gap:8px; font-family:var(--hud);
+    font-size:10.5px; color:var(--faint); letter-spacing:.04em; margin-top:5px}
+  .tick-row span.cap-mark{color:var(--gold); text-align:center}
+  .bait-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+  .bait-btn{font-family:var(--hud); font-weight:600; font-size:14px; letter-spacing:.03em;
+    padding:11px 6px; border-radius:var(--r); cursor:pointer; text-align:center;
+    background:var(--surface); border:1px solid var(--line); color:var(--muted);
+    transition:all .15s}
+  .bait-btn small{display:block; font-family:var(--body); font-weight:500; font-size:10.5px;
+    margin-top:3px; opacity:.75}
+  .bait-btn:hover{border-color:var(--line-strong); color:var(--ink)}
+  .bait-btn.active{background:rgba(61,215,196,.12); border-color:var(--aqua); color:var(--aqua)}
+  .hint{margin-top:.7rem; font-size:12.5px; color:var(--warn); display:none;
+    align-items:flex-start; gap:7px; line-height:1.45}
+  .hint.show{display:flex}
+  .hint.bad{color:var(--danger)}
+  .hint svg{flex-shrink:0; margin-top:2px}
+
+  .server-box{margin-top:1.4rem; padding-top:1.3rem; border-top:1px dashed var(--line)}
+  .server-title{font-family:var(--hud); font-weight:600; font-size:13px; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:8px; margin-bottom:.5rem}
+  .server-title svg{color:var(--aqua)}
+  .server-cap{font-size:12px; color:var(--faint); line-height:1.5; margin-bottom:1.2rem}
+
+  .readout{display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; position:relative}
+  .gauge-wrap{position:relative; width:210px; max-width:100%; aspect-ratio:1; margin:.3rem 0 .9rem}
+  .gauge-wrap svg{width:100%; height:auto}
+  .gauge-label{font-family:var(--hud); letter-spacing:.2em; text-transform:uppercase;
+    font-size:11px; color:var(--faint); position:absolute; top:50%; left:50%;
+    transform:translate(-50%,-230%)}
+  .gauge-score{font-family:var(--hud); font-weight:700; font-size:52px; line-height:1;
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-58%); color:var(--ink)}
+  .gauge-of{font-family:var(--hud); font-size:13px; color:var(--faint);
+    position:absolute; top:50%; left:50%; transform:translate(-50%,170%); letter-spacing:.1em}
+  .tier-tag{font-family:var(--hud); font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+    font-size:18px; padding:8px 20px; border-radius:24px; border:1.5px solid currentColor}
+  .tier-note{font-size:12.5px; color:var(--muted); margin-top:.85rem; max-width:30ch; line-height:1.5}
+  .formula{font-family:var(--hud); letter-spacing:.03em; font-size:12px; color:var(--faint);
+    margin-top:1rem; padding-top:1rem; border-top:1px solid var(--line); width:100%; text-align:center; line-height:1.7}
+  .formula b{color:var(--muted)}
+  .formula .srv{color:var(--gold)}
+
+  /* spawn outlook */
+  .outlook{margin-top:1.25rem}
+  .outlook-inner{display:grid; grid-template-columns:auto 1fr; gap:1.5rem; align-items:center}
+  @media(max-width:560px){.outlook-inner{grid-template-columns:1fr; gap:1.25rem}}
+  .ol-level{text-align:center; padding-right:1.5rem; border-right:1px solid var(--line)}
+  @media(max-width:560px){.ol-level{padding-right:0; border-right:none; padding-bottom:1.25rem; border-bottom:1px solid var(--line)}}
+  .ol-level .num{font-family:var(--hud); font-weight:700; font-size:46px; line-height:1; color:var(--aqua)}
+  .ol-level .lbl{font-family:var(--hud); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); margin-top:4px}
+  .ol-freq .lbl{font-family:var(--hud); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); margin-bottom:6px}
+  .ol-freq .val{font-family:var(--hud); font-weight:700; font-size:22px; color:var(--gold); margin-bottom:9px}
+  .freqbar{height:9px; background:var(--surface); border-radius:6px; overflow:hidden}
+  .freqbar i{display:block; height:100%; background:linear-gradient(90deg,var(--aqua-dim),var(--aqua));
+    border-radius:6px; transition:width .35s ease}
+  .ol-cap{font-size:12px; color:var(--faint); line-height:1.55; margin-top:1.1rem; padding-top:1.1rem; border-top:1px solid var(--line)}
+  .ol-sliders{display:grid; grid-template-columns:1fr 1fr; gap:1.1rem 1.5rem; margin-bottom:1.4rem; padding-bottom:1.4rem; border-bottom:1px solid var(--line)}
+  @media(max-width:560px){.ol-sliders{grid-template-columns:1fr; gap:1.1rem}}
+  .ol-sliders .ctrl{margin-bottom:0}
+
+  .toolbar{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:1.1rem}
+  .search{flex:1; min-width:200px; position:relative}
+  .search input{width:100%; background:var(--deep); border:1px solid var(--line);
+    border-radius:var(--r); padding:11px 14px 11px 38px; color:var(--ink);
+    font-family:var(--body); font-size:14px; outline:none}
+  .search input:focus{border-color:var(--line-strong)}
+  .search svg{position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--faint)}
+  .sortsel{background:var(--deep); border:1px solid var(--line); border-radius:var(--r);
+    padding:11px 14px; color:var(--ink); font-family:var(--hud); font-weight:600;
+    font-size:13px; letter-spacing:.05em; cursor:pointer; outline:none}
+  .map-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem}
+  .card{background:linear-gradient(180deg,var(--panel),var(--deep));
+    border:1px solid var(--line); border-radius:var(--r-lg); padding:1.2rem 1.3rem;
+    position:relative; transition:border-color .15s, transform .15s}
+  .card:hover{border-color:var(--line-strong); transform:translateY(-2px)}
+  .card.top{border-color:rgba(240,180,41,.4)}
+  .card.hidden{display:none}
+  .card-rank{position:absolute; top:1.2rem; right:1.3rem; font-family:var(--hud);
+    font-weight:700; font-size:13px; color:var(--faint); letter-spacing:.05em}
+  .card.top .card-rank{color:var(--gold)}
+  .card-name{font-family:var(--hud); font-weight:700; font-size:21px; letter-spacing:.01em;
+    padding-right:36px; line-height:1.1}
+  .toptag{display:inline-block; font-family:var(--hud); font-weight:700; font-size:10px;
+    letter-spacing:.16em; text-transform:uppercase; color:var(--abyss); background:var(--gold);
+    padding:2px 9px; border-radius:5px; margin-bottom:.5rem}
+  .card-badges{display:flex; flex-wrap:wrap; gap:6px; margin:.6rem 0 .8rem}
+  .b{font-family:var(--hud); font-weight:600; font-size:11px; letter-spacing:.05em;
+    text-transform:uppercase; padding:3px 9px; border-radius:14px; border:1px solid currentColor}
+  .b.safe{color:#5dcaa5} .b.mod{color:#f0b429} .b.dgr{color:#e8604c} .b.arid{color:#c08a5a}
+  .b.solid{color:#85b7eb} .b.thin{color:#7fa6a0}
+  .spot-lbl{font-family:var(--hud); font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--faint); margin-bottom:3px}
+  .spot{font-size:13.5px; color:var(--ink); margin-bottom:2px}
+  .coords{font-family:var(--hud); font-size:12px; color:var(--muted); letter-spacing:.03em; margin-bottom:.85rem}
+  .stars-row{display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:.85rem}
+  .stat{text-align:center}
+  .stat-l{font-family:var(--hud); font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--faint); margin-bottom:3px}
+  .pips{font-size:11px; letter-spacing:1px}
+  .pip-on{color:var(--aqua)} .pip-off{color:var(--surface)}
+  .card.top .pip-on{color:var(--gold)}
+  .card-foot{border-top:1px solid var(--line); padding-top:.75rem; font-size:12.5px;
+    color:var(--muted); display:flex; gap:7px; align-items:flex-start; line-height:1.5}
+  .card-foot svg{flex-shrink:0; margin-top:2px; color:var(--faint)}
+
+  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:1rem}
+  @media(max-width:760px){.two-col{grid-template-columns:1fr}}
+  .ref{background:var(--deep); border:1px solid var(--line); border-radius:var(--r-lg); padding:1.3rem 1.4rem}
+  .ref h3{font-family:var(--hud); font-weight:600; font-size:17px; letter-spacing:.04em; margin-bottom:.9rem;
+    display:flex; align-items:center; gap:9px}
+  .ref h3 svg{color:var(--aqua); flex-shrink:0}
+  .baitline{display:flex; align-items:center; gap:10px; padding:.6rem 0; border-bottom:1px solid var(--line)}
+  .baitline:last-child{border-bottom:none}
+  .baitname{font-family:var(--hud); font-weight:600; font-size:14px; min-width:90px}
+  .baitbar{flex:1; height:7px; background:var(--surface); border-radius:6px; overflow:hidden}
+  .baitbar i{display:block; height:100%; background:linear-gradient(90deg,var(--aqua-dim),var(--aqua)); border-radius:6px}
+  .baitcap{font-family:var(--hud); font-weight:600; font-size:12px; color:var(--muted); min-width:64px; text-align:right}
+  .tip{display:flex; gap:10px; padding:.55rem 0; font-size:13.5px; color:var(--ink); line-height:1.5}
+  .tip .dot{font-family:var(--hud); font-weight:700; color:var(--gold); flex-shrink:0}
+  .tip b{color:var(--aqua); font-weight:600}
+
+  footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line);
+    color:var(--faint); font-size:12px; line-height:1.6}
+  footer b{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">ARK: Survival Ascended · Field Computer</div>
+    <h1><span class="fish">Sabertooth Salmon</span> Fishing Guide</h1>
+    <p class="sub">Dial in your rod, fish size, and bait to read the loot potential, then pick a map. Now with full server setting overrides. Tuned to the released ASA map roster as of June 2026.</p>
+    <div class="meta-row">
+      <span class="chip">Maps live: <b>9</b></span>
+      <span class="chip">Quality: <b>Rod × Size × Bait × Server</b></span>
+      <span class="chip">Catch cap with Honey: <b>2.4×</b></span>
+      <span class="chip">Max rod: <b>500%</b></span>
+    </div>
+  </header>
+
+  <!-- CALCULATOR -->
+  <section id="calc">
+    <div class="sec-head"><span class="n">01</span> Loot Potential Calculator</div>
+    <p class="sec-cap">The <b>Loot Index</b> estimates the quality of loot from a single catch. It is not the chance a big fish spawns. Catch size is capped by bait: <b>Sap 0.94× · Leech Blood 1.88× · Honey 2.4×</b>. Bigger fish exist in the water but cannot be hooked with standard bait.</p>
+    <div class="calc">
+      <div class="panel">
+        <div class="ctrl">
+          <div class="ctrl-top">
+            <span class="ctrl-label">Rod effectiveness</span>
+            <span class="ctrl-val" id="rodVal">350<small>%</small></span>
+          </div>
+          <input type="range" id="rod" min="0" max="500" step="5" value="350" aria-label="Rod effectiveness percent">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-top">
+            <span class="ctrl-label">Fish size</span>
+            <span class="ctrl-val" id="sizeVal">2.0<small>×</small></span>
+          </div>
+          <input type="range" id="size" min="0.5" max="3.5" step="0.1" value="2.0" aria-label="Fish size multiplier">
+          <div class="tick-row">
+            <span>0.5×</span>
+            <span class="cap-mark">catch cap set by bait</span>
+            <span>3.5×</span>
+          </div>
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-top">
+            <span class="ctrl-label">Bait</span>
+            <span class="ctrl-val" id="baitVal" style="font-size:14px">Honey</span>
+          </div>
+          <div class="bait-grid" role="group" aria-label="Bait selection">
+            <button class="bait-btn" data-bait="sap" data-coef="1.0" data-cap="0.94">Sap<small>cap 0.94×</small></button>
+            <button class="bait-btn" data-bait="blood" data-coef="1.7" data-cap="1.88">Leech Blood<small>cap 1.88×</small></button>
+            <button class="bait-btn active" data-bait="honey" data-coef="1.4" data-cap="2.4">Honey<small>cap 2.4×</small></button>
+          </div>
+          <div class="hint" id="hint">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+            <span id="hintText"></span>
+          </div>
+        </div>
+
+        <!-- SERVER SETTINGS -->
+        <div class="server-box">
+          <div class="server-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="6" rx="1"/><rect x="2" y="13" width="20" height="6" rx="1"/><path d="M6 6h.01M6 16h.01"/></svg>
+            Server settings
+          </div>
+          <p class="server-cap">FishingLootQualityMultiplier scales the quality of loot you reel in. Match it to your server; official servers use 1.0.</p>
+          <div class="ctrl" style="margin-bottom:0">
+            <div class="ctrl-top">
+              <span class="ctrl-label" style="font-size:13.5px">FishingLootQualityMultiplier</span>
+              <span class="ctrl-val" id="multVal" style="font-size:18px">1.0<small>×</small></span>
+            </div>
+            <input type="range" id="mult" min="1" max="5" step="0.1" value="1.0" aria-label="Fishing loot quality multiplier">
+          </div>
+        </div>
+      </div>
+
+      <div class="panel readout">
+        <div class="gauge-wrap">
+          <svg viewBox="0 0 210 210" role="img" aria-label="Loot quality gauge">
+            <circle cx="105" cy="105" r="88" fill="none" stroke="#19323f" stroke-width="12"/>
+            <circle id="arc" cx="105" cy="105" r="88" fill="none" stroke="#3dd7c4" stroke-width="12"
+              stroke-linecap="round" stroke-dasharray="553" stroke-dashoffset="553"
+              transform="rotate(-90 105 105)" style="transition:stroke-dashoffset .35s ease, stroke .35s ease"/>
+          </svg>
+          <span class="gauge-label">Loot Index</span>
+          <span class="gauge-score" id="score">58</span>
+          <span class="gauge-of">/ 100</span>
+        </div>
+        <span class="tier-tag" id="tier" style="color:#85b7eb">Apprentice</span>
+        <p class="tier-note" id="tierNote">Reliable usable gear. You are on the right track, so keep pushing size.</p>
+        <div class="formula">
+          <b id="fRod">3.5</b> rod × <b id="fSize">2.0</b> size × <b id="fBait">1.4</b> bait × <span class="srv" id="fSrv">1.0</span> server
+        </div>
+      </div>
+    </div>
+
+    <!-- SPAWN OUTLOOK -->
+    <div class="panel outlook">
+      <div class="server-title" style="margin-bottom:1rem">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M6 21v-6M12 21v-12M18 21v-9"/></svg>
+        Spawn outlook
+      </div>
+      <p class="server-cap" style="margin-bottom:1.1rem">Server difficulty settings. They change what spawns in the water, not the quality of a fish once you catch it.</p>
+      <div class="ol-sliders">
+        <div class="ctrl">
+          <div class="ctrl-top">
+            <span class="ctrl-label" style="font-size:13.5px">OverrideOfficialDifficulty</span>
+            <span class="ctrl-val" id="diffVal" style="font-size:18px">5.0</span>
+          </div>
+          <input type="range" id="diff" min="0.5" max="10" step="0.1" value="5.0" aria-label="Override official difficulty">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-top">
+            <span class="ctrl-label" style="font-size:13.5px">DifficultyOffset</span>
+            <span class="ctrl-val" id="offsetVal" style="font-size:18px">1.00</span>
+          </div>
+          <input type="range" id="offset" min="0.05" max="1" step="0.05" value="1.0" aria-label="Difficulty offset">
+        </div>
+      </div>
+      <div class="outlook-inner">
+        <div class="ol-level">
+          <div class="num" id="maxLevel">150</div>
+          <div class="lbl">Max wild level</div>
+        </div>
+        <div class="ol-freq">
+          <div class="lbl">Large fish (2.0×+) frequency, estimated</div>
+          <div class="val" id="freqLabel">Very high</div>
+          <div class="freqbar"><i id="freqBar" style="width:100%"></i></div>
+        </div>
+      </div>
+      <p class="ol-cap">Difficulty raises how big fish can spawn and the level cap (max wild level is 30 times the difficulty value). Offset sets how often near top size fish appear. These settings shape what swims in the water, not the quality of a fish once you catch it. Remember that anything above 2.4× stays uncatchable with standard bait.</p>
+    </div>
+  </section>
+
+  <!-- MAPS -->
+  <section id="maps">
+    <div class="sec-head"><span class="n">02</span> Best Maps for Large Salmon</div>
+    <p class="sec-cap">The <b>Loot</b> pips here are an editorial rating of haul potential per location. They are a comparison aid between maps, not a spawn probability.</p>
+    <div class="toolbar">
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" id="search" placeholder="Search maps or spots" aria-label="Search maps">
+      </div>
+      <select class="sortsel" id="sort" aria-label="Sort maps">
+        <option value="rank">Sort: Overall rank</option>
+        <option value="salmon">Sort: Salmon density</option>
+        <option value="safety">Sort: Safety</option>
+        <option value="loot">Sort: Loot potential</option>
+      </select>
+    </div>
+    <div class="map-grid" id="mapGrid"></div>
+  </section>
+
+  <!-- REFERENCE -->
+  <section id="ref">
+    <div class="sec-head"><span class="n">03</span> Bait and Tactics</div>
+    <div class="two-col">
+      <div class="ref">
+        <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg> Bait value and size cap</h3>
+        <div class="baitline"><span class="baitname">Leech Blood</span><span class="baitbar"><i style="width:100%"></i></span><span class="baitcap">to 1.88×</span></div>
+        <div class="baitline"><span class="baitname">Honey</span><span class="baitbar"><i style="width:74%"></i></span><span class="baitcap">to 2.4×</span></div>
+        <div class="baitline"><span class="baitname">Sap</span><span class="baitbar"><i style="width:42%"></i></span><span class="baitcap">to 0.94×</span></div>
+        <p style="font-size:12px; color:var(--faint); margin-top:.9rem; line-height:1.5">Bars show relative loot value (coefficient); the figure is the largest fish each bait can hook. Leech Blood gives the best value but Honey reaches the biggest fish, so use Leech Blood until a fish is too large for it, then switch to Honey.</p>
+      </div>
+      <div class="ref">
+        <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg> Quick tips</h3>
+        <div class="tip"><span class="dot">&rsaquo;</span><span>Always fish <b>Salmon over Coelacanth</b> for a higher loot multiplier.</span></div>
+        <div class="tip"><span class="dot">&rsaquo;</span><span>Get a rod from <b>Alpha Mosasaur or Alpha Squid</b> kills; rod quality is the biggest lever.</span></div>
+        <div class="tip"><span class="dot">&rsaquo;</span><span>Can't get a big fish to bite? <b>Kill the small fish</b> around it so it is the only target.</span></div>
+        <div class="tip"><span class="dot">&rsaquo;</span><span>Fish from a <b>chair or bench</b>. Place either on a raft to make a mobile fishing platform.</span></div>
+        <div class="tip"><span class="dot">&rsaquo;</span><span><b>Rods can't be repaired</b>, so bring spares for a long session.</span></div>
+        <div class="tip"><span class="dot">&rsaquo;</span><span>Watch for <b>weekend loot rate events</b>; they stack on top of fish quality.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <b>Note on accuracy:</b> The Loot Index is a relative, illustrative score built from the formula the game uses (rod effectiveness × fish size × bait coefficient × FishingLootQualityMultiplier). Bait coefficients shown are relative and illustrative; exact values vary per fish species and are not published for ASA. Size caps (Sap 0.94×, Leech Blood 1.88×, Honey 2.4×) come from the official fishing table. Fish larger than 2.4× spawn but cannot be caught with standard bait. The spawn outlook is an estimate; max wild level uses the exact formula (30 times the difficulty value), while large fish frequency is approximate. Map ratings reflect community fishing intel as of June 2026; the two newest paid maps (Astraeos, Lost Colony) have thinner verified spot data. Built as a personal reference tool. Not affiliated with Studio Wildcard.
+  </footer>
+
+</div>
+
+<script>
+  // ---------- DATA ----------
+  var maps = [
+    {rank:1, name:"The Island", top:true, danger:"mod", dlabel:"Moderate", conf:"solid", clabel:"Solid data",
+      spot:"Redwood Pond (islet) · Ice Artifact Cave", coords:"Lat 51, Lon 33 · NE Snow cave",
+      salmon:5, safety:2, loot:5, bait:"Leech Blood, then Honey",
+      note:"The benchmark. Redwood Pond is the go to; the Ice Cave holds the densest large fish on the map."},
+    {rank:2, name:"Ragnarok", danger:"mod", dlabel:"Moderate", conf:"solid", clabel:"Solid data",
+      spot:"Highland Rivers", coords:"Lat ~40 to 55, Lon ~48 to 60",
+      salmon:4, safety:3, loot:4, bait:"Leech Blood",
+      note:"Long highland river systems with strong density. Ideal for raft fishing runs."},
+    {rank:3, name:"Valguero", danger:"mod", dlabel:"Moderate", conf:"solid", clabel:"Solid data",
+      spot:"The Great Lake (central)", coords:"Lat ~38, Lon ~53",
+      salmon:4, safety:3, loot:4, bait:"Leech Blood, then Honey",
+      note:"No ocean here, so the central lake hosts all aquatic spawns, concentrating salmon in the north shallows."},
+    {rank:4, name:"The Center", danger:"mod", dlabel:"Moderate", conf:"solid", clabel:"Solid data",
+      spot:"Four Lakes (Lava Island) · S. Redwood pools", coords:"Lat ~45, Lon ~40",
+      salmon:3, safety:3, loot:4, bait:"Honey",
+      note:"Salmon are scarcer than on The Island, but the four lake cluster concentrates what is there."},
+    {rank:5, name:"Astraeos", danger:"mod", dlabel:"Moderate", conf:"thin", clabel:"Thin data",
+      spot:"Coastal rivers · temperate redwoods", coords:"TBD (limited mapping)",
+      salmon:3, safety:3, loot:3, bait:"Leech Blood",
+      note:"Newer paid map. Salmon spawn in freshwater, but no standout community verified spot yet."},
+    {rank:6, name:"Lost Colony", danger:"mod", dlabel:"Moderate", conf:"thin", clabel:"Thin data",
+      spot:"Arat Prime water zones", coords:"TBD (newest map)",
+      salmon:3, safety:2, loot:3, bait:"Leech Blood",
+      note:"Newest map, least fishing intel. Salmon are present but the meta has not settled."},
+    {rank:7, name:"Extinction", danger:"dgr", dlabel:"High danger", conf:"thin", clabel:"Thin data",
+      spot:"City water channels · Sanctuary", coords:"Lat ~55, Lon ~35",
+      salmon:2, safety:1, loot:2, bait:"Leech Blood",
+      note:"Salmon exist in the channels, but constant corruption makes a relaxed session nearly impossible."},
+    {rank:8, name:"Aberration", danger:"dgr", dlabel:"High danger", conf:"thin", clabel:"Thin data",
+      spot:"Blue and Green zone waterways", coords:"Upper water zones",
+      salmon:2, safety:1, loot:2, bait:"Leech Blood",
+      note:"Some salmon in the safer water zones, but Reapers, Nameless and no flyers make it a poor pick."},
+    {rank:9, name:"Scorched Earth", danger:"arid", dlabel:"Arid", conf:"thin", clabel:"Thin data",
+      spot:"Not a fishing map", coords:"Desert, minimal freshwater",
+      salmon:1, safety:2, loot:1, bait:"None",
+      note:"Effectively no viable salmon fishing. The desert lacks the water bodies salmon need."}
+  ];
+
+  // ---------- MAP RENDER ----------
+  function pips(n){
+    var s='';
+    for(var i=1;i<=5;i++){ s += '<span class="'+(i<=n?'pip-on':'pip-off')+'">&#9679;</span>'; }
+    return s;
+  }
+  function render(list){
+    var g = document.getElementById('mapGrid');
+    g.innerHTML = '';
+    list.forEach(function(m){
+      var el = document.createElement('div');
+      el.className = 'card' + (m.top ? ' top' : '');
+      el.innerHTML =
+        '<span class="card-rank">#'+m.rank+'</span>' +
+        (m.top ? '<span class="toptag">Top pick</span><br>' : '') +
+        '<div class="card-name">'+m.name+'</div>' +
+        '<div class="card-badges">' +
+          '<span class="b '+m.danger+'">'+m.dlabel+'</span>' +
+          '<span class="b '+m.conf+'">'+m.clabel+'</span>' +
+        '</div>' +
+        '<div class="spot-lbl">Best spot</div>' +
+        '<div class="spot">'+m.spot+'</div>' +
+        '<div class="coords">'+m.coords+'</div>' +
+        '<div class="stars-row">' +
+          '<div class="stat"><div class="stat-l">Salmon</div><div class="pips">'+pips(m.salmon)+'</div></div>' +
+          '<div class="stat"><div class="stat-l">Safety</div><div class="pips">'+pips(m.safety)+'</div></div>' +
+          '<div class="stat"><div class="stat-l">Loot</div><div class="pips">'+pips(m.loot)+'</div></div>' +
+        '</div>' +
+        '<div class="card-foot">' +
+          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-3H5a2 2 0 0 0-2 2z"/></svg>' +
+          '<span><b style="color:var(--aqua)">Bait:</b> '+m.bait+'. '+m.note+'</span>' +
+        '</div>';
+      g.appendChild(el);
+    });
+  }
+  function applyFilters(){
+    var q = document.getElementById('search').value.toLowerCase().trim();
+    var sort = document.getElementById('sort').value;
+    var list = maps.filter(function(m){
+      return !q || m.name.toLowerCase().indexOf(q)>-1 || m.spot.toLowerCase().indexOf(q)>-1;
+    });
+    list.sort(function(a,b){
+      if(sort==='rank') return a.rank - b.rank;
+      return b[sort] - a[sort] || a.rank - b.rank;
+    });
+    render(list);
+  }
+  document.getElementById('search').addEventListener('input', applyFilters);
+  document.getElementById('sort').addEventListener('change', applyFilters);
+
+  // ---------- CALCULATOR ----------
+  var rod = document.getElementById('rod');
+  var size = document.getElementById('size');
+  var mult = document.getElementById('mult');
+  var diff = document.getElementById('diff');
+  var offset = document.getElementById('offset');
+  var baitBtns = document.querySelectorAll('.bait-btn');
+  var baitCoef = 1.4, baitName = 'Honey', baitKey = 'honey', baitCap = 2.4;
+
+  var MAXRAW = 5.0 * 2.4 * 1.4;
+
+  var tiers = [
+    {min:0,  name:'Primitive',  color:'#7fa6a0', note:'Mostly resources and meat. Bump rod, size, or bait to start seeing gear.'},
+    {min:30, name:'Ramshackle', color:'#9fe1cb', note:'Low tier blueprints appear. Bigger fish and a stronger rod move you up fast.'},
+    {min:48, name:'Apprentice', color:'#85b7eb', note:'Reliable usable gear. You are on the right track, so keep pushing size.'},
+    {min:64, name:'Journeyman', color:'#3dd7c4', note:'Solid mid tier blueprints likely. Push size and rod higher for Ascendant odds.'},
+    {min:80, name:'Mastercraft',color:'#f0b429', note:'Strong loot range. A near max rod on a big fish gets you to the top band.'},
+    {min:92, name:'Ascendant',  color:'#f0b429', note:'Top band potential. About as good as a single cast gets.'}
+  ];
+
+  function round1(v){ return Math.round(v*10)/10; }
+
+  function recommendBait(sz){
+    if(sz <= 0.94) return 'Sap, Leech Blood, or Honey can hook it.';
+    if(sz <= 1.88) return 'Use Leech Blood or Honey for a fish this size.';
+    if(sz <= 2.4)  return 'Only Honey can hook a fish this large, so switch to Honey.';
+    return 'Uncatchable. No standard bait hooks a fish above 2.4×. Find a smaller one.';
+  }
+
+  function updateOutlook(){
+    var dVal = parseFloat(diff.value);
+    var oVal = parseFloat(offset.value);
+    document.getElementById('diffVal').textContent = dVal.toFixed(1);
+    document.getElementById('offsetVal').textContent = oVal.toFixed(2);
+
+    var maxLevel = Math.round(30 * dVal);
+    document.getElementById('maxLevel').textContent = maxLevel;
+
+    var diffScale = Math.min(1, dVal/5);
+    var freqPct = Math.round(oVal * diffScale * 100);
+    document.getElementById('freqBar').style.width = freqPct + '%';
+
+    var label;
+    if(freqPct >= 80) label = 'Very high';
+    else if(freqPct >= 55) label = 'High';
+    else if(freqPct >= 30) label = 'Moderate';
+    else if(freqPct >= 12) label = 'Low';
+    else label = 'Very low';
+    document.getElementById('freqLabel').textContent = label;
+  }
+
+  function update(){
+    var rEff = parseInt(rod.value,10);
+    var fSize = parseFloat(size.value);
+    var srv = parseFloat(mult.value);
+
+    document.getElementById('rodVal').innerHTML = rEff + '<small>%</small>';
+    document.getElementById('baitVal').textContent = baitName;
+    document.getElementById('multVal').innerHTML = srv.toFixed(1) + '<small>×</small>';
+
+    var sizeValEl = document.getElementById('sizeVal');
+    var hint = document.getElementById('hint');
+    var ht = document.getElementById('hintText');
+    var arc = document.getElementById('arc');
+    var circ = 553;
+    var catchable = fSize <= baitCap + 0.001;
+
+    sizeValEl.innerHTML = round1(fSize).toFixed(1) + '<small>×</small>';
+    sizeValEl.classList.toggle('cap', !catchable);
+
+    document.getElementById('fRod').textContent = round1(rEff/100).toFixed(1);
+    document.getElementById('fSize').textContent = round1(fSize).toFixed(1);
+    document.getElementById('fBait').textContent = baitCoef.toFixed(1);
+    document.getElementById('fSrv').textContent = srv.toFixed(1);
+
+    if(!catchable){
+      document.getElementById('score').textContent = '\u2014';
+      arc.style.strokeDashoffset = circ;
+      arc.setAttribute('stroke', '#e8604c');
+      var tierBad = document.getElementById('tier');
+      tierBad.textContent = 'No catch';
+      tierBad.style.color = '#e8604c';
+      document.getElementById('tierNote').textContent = recommendBait(fSize);
+      hint.classList.add('show','bad');
+      ht.textContent = 'This fish (' + round1(fSize).toFixed(1) + '×) is over the ' + baitName + ' cap of ' + baitCap + '×. ' + recommendBait(fSize);
+      updateOutlook();
+      return;
+    }
+
+    var raw = (rEff/100) * fSize * baitCoef * srv;
+    var idx = Math.round(Math.min(100, (raw / MAXRAW) * 100));
+    document.getElementById('score').textContent = idx;
+    arc.style.strokeDashoffset = circ - (circ * idx/100);
+
+    var t = tiers[0];
+    for(var i=0;i<tiers.length;i++){ if(idx >= tiers[i].min) t = tiers[i]; }
+    var tierEl = document.getElementById('tier');
+    tierEl.textContent = t.name;
+    tierEl.style.color = t.color;
+    arc.setAttribute('stroke', t.color);
+    var note = t.note;
+    if(idx >= 100) note = 'Maxed out. The server multiplier is guaranteeing top tier loot from this catch.';
+    document.getElementById('tierNote').textContent = note;
+
+    hint.classList.remove('bad');
+    if(baitKey === 'sap' && fSize > 0.7){
+      hint.classList.add('show');
+      ht.textContent = 'Sap is low value and caps at 0.94×. Leech Blood gives much better loot.';
+    } else if(baitKey === 'blood' && fSize > 1.7){
+      hint.classList.add('show');
+      ht.textContent = 'Near the Leech Blood cap of 1.88×. Any larger and you must switch to Honey.';
+    } else if(baitKey === 'honey' && fSize > 2.2){
+      hint.classList.add('show');
+      ht.textContent = 'Near the maximum catchable size of 2.4×. Bigger fish exist but cannot be hooked.';
+    } else {
+      hint.classList.remove('show');
+    }
+
+    updateOutlook();
+  }
+
+  rod.addEventListener('input', update);
+  size.addEventListener('input', update);
+  mult.addEventListener('input', update);
+  diff.addEventListener('input', update);
+  offset.addEventListener('input', update);
+
+  baitBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      baitBtns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      baitCoef = parseFloat(btn.getAttribute('data-coef'));
+      baitCap = parseFloat(btn.getAttribute('data-cap'));
+      baitKey = btn.getAttribute('data-bait');
+      baitName = baitKey==='sap'?'Sap':baitKey==='honey'?'Honey':'Leech Blood';
+      update();
+    });
+  });
+
+  // ---------- INIT ----------
+  applyFilters();
+  update();
+</script>
+</body>
+</html>
