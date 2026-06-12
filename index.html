@@ -189,7 +189,7 @@
     color:var(--faint); margin-bottom:3px}
   .pips{font-size:11px; letter-spacing:1px}
   .pip-on{color:var(--aqua)} .pip-off{color:var(--surface)}
-  .card.top .pip-on{color:var(--gold)}
+  .pip-c1{color:#74c957} .pip-c2{color:#4aa0ea} .pip-c3{color:#b070e6} .pip-c4{color:#f2c42a} .pip-c5{color:#5be3e8}
   .card-foot{border-top:1px solid var(--line); padding-top:.75rem; font-size:12.5px;
     color:var(--muted); display:flex; gap:7px; align-items:flex-start; line-height:1.5}
   .card-foot svg{flex-shrink:0; margin-top:2px; color:var(--faint)}
@@ -539,7 +539,9 @@
   // ---------- MAP RENDER ----------
   function pips(n){
     var s='';
-    for(var i=1;i<=5;i++){ s += '<span class="'+(i<=n?'pip-on':'pip-off')+'">&#9679;</span>'; }
+    for(var i=1;i<=5;i++){
+      s += i<=n ? '<span class="pip-on pip-c'+n+'">&#9679;</span>' : '<span class="pip-off">&#9679;</span>';
+    }
     return s;
   }
   function mappable(s){ return !!mapCal[s.map] && typeof s.lat === 'number'; }
